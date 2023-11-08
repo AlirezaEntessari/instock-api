@@ -10,4 +10,10 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     charset: "utf8",
   },
+  migrations: {
+    directory: __dirname + '/migrations',
+  },
+  seeds: {
+    directory: __dirname + '/seeds',
+  },
 }
