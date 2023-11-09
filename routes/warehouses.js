@@ -2,6 +2,18 @@ const express = require("express");
 const router = express.Router();
 const knex = require('knex')(require('../knexfile'));
 
+router.get('/', async (req, res) => {
+
+    try {
+        const warehouses = await knex('warehouses').select('*');
+
+        return res.status(200).json(warehouses);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 router.delete('/:id', async (req, res) => {
     const warehouseId = req.params.id;
 
