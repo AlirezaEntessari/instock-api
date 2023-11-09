@@ -1,25 +1,26 @@
-const express = require("express");
-const app = express();
-const cors = require("cors");
 require('dotenv').config();
-const inventoriesRoutes = require('./routes/inventories');
-const warehousesRoutes = require('./routes/warehouses');
+const express = require('express');
+const app = express();
+const cors = require('cors');
+const knex = require('knex')(require('./knexfile.js'));
 
-const { PORT, BACKEND_URL } = process.env
-console.log(PORT);
-console.log(BACKEND_URL);
+const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000'
+}));
 
-app.use('/inventory', inventoriesRoutes);
-app.use('/warehouse', warehousesRoutes);
+const warehousesRoute = require('./routes/warehouses.js');
+app.use('/api/warehouses', warehousesRoute);
 
+const inventoriesRoute = require('./routes/inventories.js');
+app.use('/api/inventories', inventoriesRoute);
 
-app.listen(8080, (error) => {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log("Server Running...")
-  }
-})
+app.get('/api', (req, res) => {
+  res.send(`API is running`);
+});
+
+app.listen(PORT, () => {
+  console.log(`running at http://localhost:${PORT}`);
+});
