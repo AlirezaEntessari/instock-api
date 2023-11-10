@@ -13,6 +13,21 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/:id', async (req, res) => {
+
+    const id = req.params.id;
+
+    try {
+        const warehouses = await knex('warehouses').select('id', "warehouse_name",  "address", "city", "country", "contact_name",
+        "contact_position", "contact_phone", "contact_email").where({ id: id });
+
+        return res.status(200).json(warehouses);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 router.get('/:id/inventories', async (req, res) => {
     const id = req.params.id;
     const warehouse = await knex('warehouses').where({id: id}).first();
