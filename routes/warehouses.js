@@ -13,6 +13,17 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/:id/inventories', async (req, res) => {
+    const id = req.params.id;
+    const warehouse = await knex('warehouses').where({id: id}).first();
+    if (!warehouse) return res.status(404).json({error: 'Warehouse not found.'});
+
+    const inventories = await knex('inventories')
+        .where({warehouse_id : id})
+        .select('id', 'item_name', 'category', 'status', 'quantity');
+    res.status(200).json(inventories);
+});
+
 router.put('/:id', async (req, res) => {
     // https://stackoverflow.com/a/48800
     const validateEmail = (email) => {
