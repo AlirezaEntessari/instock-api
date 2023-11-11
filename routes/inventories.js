@@ -89,17 +89,17 @@ router.put('/:id', async (req, res) => {
 	}
 });
 router.delete('/:id', async (req, res) => {
-    const warehouseId = req.params.id;
+    const inventoryId = req.params.id;
 
     try {
-        const existingWarehouse = await knex('warehouses').where({ id: warehouseId }).first();
+        const existingInventory = await knex('inventories').where({ id: inventoryId }).first();
 
-        if (!existingWarehouse) {
-            return res.status(404).json({ error: 'Warehouse not found' });
+        if (!existingInventory) {
+            return res.status(404).json({ error: 'Inventory not found' });
         }
 
         await knex.transaction(async (trx) => {
-            await trx('inventory').where({ warehouse_id: warehouseId }).del();
+            await trx('inventory').where({ inventory_id: inventoryId }).del();
             await trx('warehouses').where({ id: warehouseId }).del();
         });
 
