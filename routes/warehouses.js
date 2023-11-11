@@ -28,6 +28,51 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.post('/', async (req, res) => {
+    try {
+    const { warehouseName, streetAddress, city, country, contactName, position, phoneNumber, email } = req.body;
+
+    if  (!warehouseName || !streetAddress || !city || !country || !contactName || !position || !phoneNumber || !email) {
+        return res.status(400).json({error: 'Your request is invalid'});
+    }
+    // https://stackoverflow.com/a/48800
+    const validateEmail = (email) => {
+        return String(email)
+        .toLowerCase()
+        .match(
+           /^\S+@\S+\.\S+$/ 
+        );
+    };
+    // https://stackoverflow.com/a/4339299
+    const validatePhone = (num) => {
+        return String(num)
+            .match(/\d/g)
+            .length >= 10;
+    };
+    if (!validateEmail(email)) return res.status(400).json({error: 'Your email is not valid.'});
+    if (!validatePhone(phoneNumber)) return res.status(400).json({error: 'Your phone number is not valid.'});
+
+  const newWarehouse = {
+    id: uuid(),
+    warehouse_name: warehouseName,
+    address: streetAddress,
+    city: city,
+    country: country,
+    contact_name: contactName,
+    contact_position: position,
+    contact_phoneNumber: phoneNumber,
+    contact_email: email,
+  };
+    await knex('warehouses').insert(newWarehouse);
+    
+    return res.status(201).json(newWarehouse);
+} catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+}
+
+});
+
 router.get('/:id/inventories', async (req, res) => {
     const id = req.params.id;
     const warehouse = await knex('warehouses').where({id: id}).first();
