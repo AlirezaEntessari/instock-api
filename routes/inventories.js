@@ -100,7 +100,6 @@ router.delete('/:id', async (req, res) => {
 
 		await knex.transaction(async (trx) => {
 			await trx('inventory').where({ inventory_id: inventoryId }).del();
-			await trx('warehouses').where({ id: warehouseId }).del();
 		});
 
 		return res.status(204).send();
