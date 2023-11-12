@@ -88,6 +88,27 @@ router.put('/:id', async (req, res) => {
 		return res.status(500).json({ error: 'Internal Server Error' });
 	}
 });
+router.delete('/:id', async (req, res) => {
+	const inventoryId = req.params.id;
+
+	try {
+		const existingInventory = await knex('inventories').where({ id: inventoryId }).first();
+
+		if (!existingInventory) {
+			return res.status(404).json({ error: 'Inventory not found' });
+		}
+
+
+		await knex.transaction(async (trx) => {
+			await trx('inventory').where({ inventory_id: inventoryId }).del();
+		});
+
+		return res.status(204).send();
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
 
 router.post('/', async (req, res) => {
 	const {
@@ -125,5 +146,6 @@ router.post('/', async (req, res) => {
 		res.status(500).json({error: 'Internal server error.'})
 	}
 })
+
 
 module.exports = router;
