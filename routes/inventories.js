@@ -89,24 +89,24 @@ router.put('/:id', async (req, res) => {
 	}
 });
 router.delete('/:id', async (req, res) => {
-    const inventoryId = req.params.id;
+	const inventoryId = req.params.id;
 
-    try {
-        const existingInventory = await knex('inventories').where({ id: inventoryId }).first();
+	try {
+		const existingInventory = await knex('inventories').where({ id: inventoryId }).first();
 
-        if (!existingInventory) {
-            return res.status(404).json({ error: 'Inventory not found' });
-        }
+		if (!existingInventory) {
+			return res.status(404).json({ error: 'Inventory not found' });
+		}
 
-        await knex.transaction(async (trx) => {
-            await trx('inventory').where({ inventory_id: inventoryId }).del();
-            await trx('warehouses').where({ id: warehouseId }).del();
-        });
+		await knex.transaction(async (trx) => {
+			await trx('inventory').where({ inventory_id: inventoryId }).del();
+			await trx('warehouses').where({ id: warehouseId }).del();
+		});
 
-        return res.status(204).send();
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal Server Error' });
-    }
+		return res.status(204).send();
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ error: 'Internal Server Error' });
+	}
 });
 module.exports = router;
