@@ -98,6 +98,7 @@ router.delete('/:id', async (req, res) => {
 			return res.status(404).json({ error: 'Inventory not found' });
 		}
 
+
 		await knex.transaction(async (trx) => {
 			await trx('inventory').where({ inventory_id: inventoryId }).del();
 		});
@@ -108,4 +109,43 @@ router.delete('/:id', async (req, res) => {
 		return res.status(500).json({ error: 'Internal Server Error' });
 	}
 });
+
+router.post('/', async (req, res) => {
+	const {
+		warehouse_id,
+		item_name,
+		description,
+		category,
+		status,
+		quantity
+	} = req.body || {};
+
+    // i cant think of a better way of handling a wrong body in the request
+    if (!warehouse_id || !item_name || !description || !category || !status || !quantity) {
+        return res.status(400).json({error: 'Invalid body in request'});
+    }
+	if (isNaN(quantity)) {
+		return res.status(400).json({ error: 'Quantity must be a number.' });
+	}
+	try {
+		const warehouse = await knex('warehouses').where({id: warehouse_id}).first();
+        if (!warehouse) return res.status(400).json({error: 'Warehouse not found.'});
+		const newEntryId = await knex('inventories').insert({
+			warehouse_id: warehouse_id,
+			item_name: item_name,
+			description: description,
+			category: category,
+			status: status,
+			quantity: quantity
+		})
+		const newEntry = await knex('inventories').where('id', newEntryId[0]);
+		return res.status(201).json(newEntry);
+
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({error: 'Internal server error.'})
+	}
+})
+
+
 module.exports = router;
