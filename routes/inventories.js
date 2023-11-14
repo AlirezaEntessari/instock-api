@@ -14,6 +14,18 @@ router.get('/', async (req, res) => {
 	}
 });
 
+router.get('/:id', async (req, res) => {
+	try {
+		const data = await knex('inventories')
+			.join('warehouses', 'warehouses.id', 'inventories.warehouse_id')
+			.select('inventories.id', 'warehouses.warehouse_name', 'item_name', 'description', 'category', 'status', 'quantity')
+			.where({ "inventories.id": req.params.id });
+		res.json(data);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
 router.post('/seed', async (req, res) => {
 	try {
 		await knex.seed.run({ specific: '02_inventories.js' });
@@ -120,16 +132,16 @@ router.post('/', async (req, res) => {
 		quantity
 	} = req.body || {};
 
-    // i cant think of a better way of handling a wrong body in the request
-    if (!warehouse_id || !item_name || !description || !category || !status || !quantity) {
-        return res.status(400).json({error: 'Invalid body in request'});
-    }
+	// i cant think of a better way of handling a wrong body in the request
+	if (!warehouse_id || !item_name || !description || !category || !status || !quantity) {
+		return res.status(400).json({ error: 'Invalid body in request' });
+	}
 	if (isNaN(quantity)) {
 		return res.status(400).json({ error: 'Quantity must be a number.' });
 	}
 	try {
-		const warehouse = await knex('warehouses').where({id: warehouse_id}).first();
-        if (!warehouse) return res.status(400).json({error: 'Warehouse not found.'});
+		const warehouse = await knex('warehouses').where({ id: warehouse_id }).first();
+		if (!warehouse) return res.status(400).json({ error: 'Warehouse not found.' });
 		const newEntryId = await knex('inventories').insert({
 			warehouse_id: warehouse_id,
 			item_name: item_name,
@@ -143,7 +155,7 @@ router.post('/', async (req, res) => {
 
 	} catch (e) {
 		console.error(e);
-		res.status(500).json({error: 'Internal server error.'})
+		res.status(500).json({ error: 'Internal server error.' })
 	}
 })
 
