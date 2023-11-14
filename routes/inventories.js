@@ -14,6 +14,18 @@ router.get('/', async (req, res) => {
 	}
 });
 
+router.get('/:id', async (req, res) => {
+	try {
+		const data = await knex('inventories')
+			.join('warehouses', 'warehouses.id', 'inventories.warehouse_id')
+			.select('inventories.id', 'warehouses.warehouse_name', 'item_name', 'description', 'category', 'status', 'quantity')
+			.where({"inventories.id": req.params.id});
+		res.json(data);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
 router.post('/seed', async (req, res) => {
 	try {
 		await knex.seed.run({ specific: '02_inventories.js' });
